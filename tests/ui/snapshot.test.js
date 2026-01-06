@@ -236,12 +236,12 @@ const SimpleDashboard = ({ monitors = [], groupFilter = null, groups = [] }) => 
                 Type
               </Text>
             </Box>
-            <Box width="9%">
+            <Box width="10%">
               <Text bold color="blue">
                 Status
               </Text>
             </Box>
-            <Box width="9%">
+            <Box width="10%">
               <Text bold color="blue">
                 Latency
               </Text>
@@ -251,7 +251,7 @@ const SimpleDashboard = ({ monitors = [], groupFilter = null, groups = [] }) => 
                 Uptime (24h)
               </Text>
             </Box>
-            <Box width="22%">
+            <Box width="20%">
               <Text bold color="blue">
                 Last Downtime
               </Text>
@@ -923,7 +923,14 @@ describe('MonitorDetail Component Snapshots', () => {
   });
 
   it('should render ICMP monitor detail', () => {
-    const monitor = { id: 2, name: 'Google DNS', type: 'icmp', url: '8.8.8.8', interval: 30, webhook_url: null };
+    const monitor = {
+      id: 2,
+      name: 'Google DNS',
+      type: 'icmp',
+      url: '8.8.8.8',
+      interval: 30,
+      webhook_url: null
+    };
     const heartbeats = [
       { status: 'up', timestamp: '2024-11-28 12:00:00', latency: 25 },
       { status: 'up', timestamp: '2024-11-28 11:59:30', latency: 28 },
@@ -936,7 +943,14 @@ describe('MonitorDetail Component Snapshots', () => {
   });
 
   it('should render SSL monitor detail - valid certificate', () => {
-    const monitor = { id: 4, name: 'GitHub SSL', type: 'ssl', url: 'github.com', interval: 3600, webhook_url: null };
+    const monitor = {
+      id: 4,
+      name: 'GitHub SSL',
+      type: 'ssl',
+      url: 'github.com',
+      interval: 3600,
+      webhook_url: null
+    };
     const heartbeats = [
       { status: 'up', timestamp: '2024-11-28 12:00:00', latency: 250 },
       { status: 'up', timestamp: '2024-11-28 11:00:00', latency: 245 }
@@ -1009,7 +1023,14 @@ describe('MonitorDetail Component Snapshots', () => {
   });
 
   it('should render SSL monitor detail - invalid certificate', () => {
-    const monitor = { id: 7, name: 'Expired SSL', type: 'ssl', url: 'expired.com', interval: 3600, webhook_url: null };
+    const monitor = {
+      id: 7,
+      name: 'Expired SSL',
+      type: 'ssl',
+      url: 'expired.com',
+      interval: 3600,
+      webhook_url: null
+    };
     const heartbeats = [{ status: 'down', timestamp: '2024-11-28 12:00:00', latency: 0 }];
     const sslCert = {
       issuer: 'Unknown',

@@ -750,6 +750,7 @@ describe('Group Command Logic', () => {
         url TEXT, 
         type TEXT,
         interval INTEGER,
+        retries INTEGER DEFAULT 0,
         group_name TEXT
       );
       CREATE TABLE heartbeats (
@@ -1019,6 +1020,7 @@ describe('Add Monitor with Group', () => {
         type TEXT NOT NULL,
         url TEXT NOT NULL,
         interval INTEGER DEFAULT 60,
+        retries INTEGER DEFAULT 0,
         name TEXT,
         webhook_url TEXT,
         group_name TEXT
@@ -1035,6 +1037,20 @@ describe('Add Monitor with Group', () => {
       'http',
       'https://dev.example.com',
       60,
+      'dev-api',
+      'dev'
+    );
+
+    const monitor = db.prepare('SELECT * FROM monitors WHERE name = ?').get('dev-api');
+    expect(monitor.group_name).toBe('dev');
+  });
+
+  it('should add monitor with group and retries', () => {
+    db.prepare('INSERT INTO monitors (type, url, interval, retries, name, group_name) VALUES (?, ?, ?, ?, ?, ?)').run(
+      'http',
+      'https://dev.example.com',
+      60,
+      3,
       'dev-api',
       'dev'
     );
@@ -1095,15 +1111,17 @@ describe('Edit Monitor Group', () => {
         type TEXT NOT NULL,
         url TEXT NOT NULL,
         interval INTEGER DEFAULT 60,
+        retries INTEGER DEFAULT 0,
         name TEXT,
         webhook_url TEXT,
         group_name TEXT
       );
     `);
-    db.prepare('INSERT INTO monitors (type, url, interval, name, group_name) VALUES (?, ?, ?, ?, ?)').run(
+    db.prepare('INSERT INTO monitors (type, url, interval, retries, name, group_name) VALUES (?, ?, ?, ?, ?, ?)').run(
       'http',
       'https://example.com',
       60,
+      3,
       'test',
       'dev'
     );

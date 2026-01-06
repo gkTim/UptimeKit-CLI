@@ -6,7 +6,8 @@ import readline from 'readline';
 const MonitorSchema = z.object({
   url: z.string().min(1),
   type: z.enum(['http', 'icmp', 'dns', 'ssl']),
-  interval: z.number().int().min(1).positive()
+  interval: z.number().int().min(1),
+  retries: z.number().int().min(0).optional()
 });
 
 export function registerAddCommand(program) {
@@ -15,10 +16,11 @@ export function registerAddCommand(program) {
     .description('Add a new monitor')
     .addHelpText(
       'after',
-      '\n\nExamples:\n  uptimekit add https://example2.com -t http -i 30 -n newsite\n  uptimekit add google.com -t dns -i 60 -n googledns\n  uptimekit add example.com -t ssl -i 3600 -n myssl\n  uptimekit add https://api.dev.com -t http -i 30 -n "dev-api" -g dev\n'
+      '\n\nExamples:\n  uptimekit add https://example2.com -t http -i 30 -n newsite\n  uptimekit add https://tworetries.com -t http -i 30 -r2 -n tworetries\n  uptimekit add google.com -t dns -i 60 -n googledns\n  uptimekit add example.com -t ssl -i 3600 -n myssl\n  uptimekit add https://api.dev.com -t http -i 30 -n "dev-api" -g dev\n'
     )
     .option('-t, --type <type>', 'Type of monitor (http, icmp, dns, ssl)')
     .option('-i, --interval <seconds>', 'Check interval in seconds', '60')
+    .option('-r, --retries <number>', 'Check retries before notifications are send', '0')
     .option('-n, --name <name>', 'Custom name for monitor')
     .option('-w, --webhook <url>', 'Webhook URL for notifications')
     .option('-g, --group <group>', 'Group name for organizing monitors (e.g., dev, prod, staging)')
@@ -37,7 +39,10 @@ export function registerAddCommand(program) {
         }
 
         let finalUrl = url;
-        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const rl = readline.createInterface({
+          input: process.stdin,
+          output: process.stdout
+        });
         const question = q => new Promise(resolve => rl.question(q, ans => resolve(ans)));
 
         // sometimes people type 'add add google.com' by mistake, let's catch that
@@ -160,11 +165,15 @@ export function registerAddCommand(program) {
 
         rl.close();
         await initDB();
+
         const interval = parseInt(options.interval, 10);
+        const retries = options.retries !== undefined ? parseInt(options.retries, 10) : undefined;
+
         const data = MonitorSchema.parse({
           url: finalUrl,
           type: options.type,
-          interval
+          interval,
+          retries
         });
 
         let name = options.name;
@@ -181,9 +190,14 @@ export function registerAddCommand(program) {
         }
 
         const groupName = options.group || null;
-        addMonitor(data.type, data.url, data.interval, name, options.webhook, groupName);
+        addMonitor(data.type, data.url, data.interval, data.retries ?? 0, name, options.webhook, groupName);
 
         let successMsg = `Monitor added: ${name} (${data.url}, ${data.type})`;
+
+        if (retries) {
+          successMsg += ` Retries: ${retries}`;
+        }
+
         if (groupName) {
           successMsg += ` [Group: ${groupName}]`;
         }

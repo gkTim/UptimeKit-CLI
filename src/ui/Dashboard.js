@@ -42,6 +42,11 @@ const MonitorTable = ({ monitors, title, titleColor = 'white' }) => {
             Latency
           </Text>
         </Box>
+        <Box width="10%">
+          <Text bold color="blue">
+            Retries
+          </Text>
+        </Box>
         <Box width="12%">
           <Text bold color="blue">
             Uptime (24h)
@@ -91,6 +96,9 @@ const MonitorTable = ({ monitors, title, titleColor = 'white' }) => {
             </Box>
             <Box width="10%">
               <Text color={m.latency > 500 ? 'yellow' : 'green'}>{m.latency}ms</Text>
+            </Box>
+            <Box width="10%">
+              <Text color={m.current_retries > 1 ? 'yellow' : 'green'}>{m.current_retries}</Text>
             </Box>
             <Box width="12%">
               <Text color={parseFloat(m.uptime) > 99 ? 'green' : 'yellow'}>{m.uptime}%</Text>

@@ -7,6 +7,7 @@ const MonitorSchema = z.object({
   url: z.string().min(1).optional(),
   type: z.enum(['http', 'icmp', 'dns', 'ssl']).optional(),
   interval: z.number().int().min(1).positive().optional(),
+  retries: z.number().int().min(0).positive().optional(),
   name: z.string().optional(),
   webhook_url: z.string().nullable().optional(),
   group_name: z.string().nullable().optional()
@@ -19,6 +20,7 @@ export function registerEditCommand(program) {
     .option('-u, --url <url>', 'New URL')
     .option('-t, --type <type>', 'New type (http, icmp, dns, ssl)')
     .option('-i, --interval <seconds>', 'New interval in seconds')
+    .option('-r, --retries <number>', 'Check retries before notifications are send', '0')
     .option('-n, --name <name>', 'New name')
     .option('-w, --webhook <url>', 'New webhook URL')
     .option('-g, --group <group>', 'New group name (use "none" to remove from group)')
@@ -38,6 +40,7 @@ export function registerEditCommand(program) {
         if (options.url) updates.url = options.url;
         if (options.type) updates.type = options.type;
         if (options.interval) updates.interval = parseInt(options.interval, 10);
+        if (options.retries) updates.retries = parseInt(options.retries, 10);
         if (options.name) updates.name = options.name;
         if (options.webhook) updates.webhook_url = options.webhook;
         if (options.group !== undefined) {
@@ -49,7 +52,10 @@ export function registerEditCommand(program) {
           console.log(chalk.blue(`Editing monitor: ${monitor.name} (${monitor.url})`));
           console.log(chalk.gray('Press Enter to keep current value.'));
 
-          const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+          const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+          });
           const question = q => new Promise(resolve => rl.question(q, ans => resolve(ans)));
 
           const newName = await question(`Name [${monitor.name}]: `);
@@ -63,6 +69,9 @@ export function registerEditCommand(program) {
 
           const newInterval = await question(`Interval [${monitor.interval}]: `);
           if (newInterval.trim()) updates.interval = parseInt(newInterval.trim(), 10);
+
+          const newRetries = await question(`Retries [${monitor.retries}]: `);
+          if (newRetries.trim()) updates.retries = parseInt(newRetries.trim(), 10);
 
           const currentWebhook = monitor.webhook_url || 'none';
           const newWebhook = await question(`Webhook URL [${currentWebhook}]: `);

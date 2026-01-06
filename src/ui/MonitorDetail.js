@@ -111,6 +111,7 @@ export default function MonitorDetail({ idOrName }) {
     return {
       latencies,
       currentStatus: heartbeats[0]?.status || 'unknown',
+      currentRetries: heartbeats[0]?.currentRetries || 0,
       min: latencies.length ? Math.min(...latencies) : 0,
       max: latencies.length ? Math.max(...latencies) : 0,
       avg: latencies.length ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) : 0,
@@ -395,6 +396,11 @@ export default function MonitorDetail({ idOrName }) {
           label="Uptime (24h)"
           value={`${stats.uptime}%`}
           color={parseFloat(stats.uptime) > 99 ? 'green' : 'yellow'}
+        />
+        <StatBox
+          label="Retries"
+          value={`${stats.currentRetries}`}
+          color={parseInt(stats.uptime, 10) === 0 ? 'green' : 'yellow'}
         />
       </Box>
     </Box>

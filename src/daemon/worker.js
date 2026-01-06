@@ -1,5 +1,11 @@
 import { initDB, getMonitors, logHeartbeat, getNotificationSettings, upsertSSLCertificate } from '../core/db.js';
-import { notifyMonitorDown, notifyMonitorUp, notifySSLExpiring, notifySSLExpired, notifySSLValid } from '../core/notifier.js';
+import {
+  notifyMonitorDown,
+  notifyMonitorUp,
+  notifySSLExpiring,
+  notifySSLExpired,
+  notifySSLValid
+} from '../core/notifier.js';
 import axios from 'axios';
 import ping from 'ping';
 import dns from 'dns/promises';
@@ -35,8 +41,8 @@ async function checkSSLCertificate(hostname, port = 443) {
         const daysRemaining = Math.floor((validTo - now) / (1000 * 60 * 60 * 24));
 
         resolve({
-          issuer: cert.issuer ? (cert.issuer.O || cert.issuer.CN || 'Unknown') : 'Unknown',
-          subject: cert.subject ? (cert.subject.CN || cert.subject.O || hostname) : hostname,
+          issuer: cert.issuer ? cert.issuer.O || cert.issuer.CN || 'Unknown' : 'Unknown',
+          subject: cert.subject ? cert.subject.CN || cert.subject.O || hostname : hostname,
           validFrom: validFrom.toISOString(),
           validTo: validTo.toISOString(),
           daysRemaining: daysRemaining,
@@ -50,7 +56,7 @@ async function checkSSLCertificate(hostname, port = 443) {
       }
     });
 
-    socket.on('error', (err) => {
+    socket.on('error', err => {
       reject(err);
     });
 
@@ -159,7 +165,6 @@ async function checkMonitor(monitor) {
       const monitorData = activeMonitors.get(monitor.id);
       const lastNotifiedThreshold = monitorData?.lastSSLNotifiedThreshold || 0;
 
-
       const thresholds = [30, 14, 7, 3, 1];
       for (const threshold of thresholds) {
         if (days <= threshold && lastNotifiedThreshold < threshold) {
@@ -212,7 +217,11 @@ async function refreshMonitors() {
         startMonitorLoop(monitor);
       } else {
         const current = activeMonitors.get(monitor.id);
-        if (current.monitor.interval !== monitor.interval || current.monitor.url !== monitor.url || current.monitor.type !== monitor.type) {
+        if (
+          current.monitor.interval !== monitor.interval ||
+          current.monitor.url !== monitor.url ||
+          current.monitor.type !== monitor.type
+        ) {
           clearInterval(current.intervalId);
           startMonitorLoop(monitor, current.lastStatus);
         }
